@@ -7,6 +7,7 @@ may be found at http://elections.huffingtonpost.com/pollster/api.
 from future.moves.urllib.parse import urlencode
 from future.moves.urllib.request import urlopen
 from future.moves.urllib.error import HTTPError
+from future.utils import iteritems
 
 try:
     import json
@@ -46,7 +47,7 @@ class Pollster(object):
                                                                 url_exc.reason)
             try:
                 r_msg = dict(json.loads(res))
-                if r_msg.has_key('errors'):
+                if 'errors' in r_msg:
                     msg += " [%s]" % r_msg['errors'][0]
             except ValueError:
                 pass
@@ -86,11 +87,11 @@ class Chart(object):
                  'topic',
                  'state',
                  'slug', ]
-        for key, val in result.iteritems():
+        for key, val in iteritems(result):
             if key in valid:
                 setattr(self, key, val)
 
-        if result.has_key('estimates_by_date'):
+        if 'estimates_by_date' in result:
             self._estimates_by_date = result['estimates_by_date']
 
     def polls(self, **kwargs):
@@ -132,7 +133,7 @@ class Poll(object):
                  'sponsors',
                  'partisan',
                  'affiliation']
-        for key, val in result.iteritems():
+        for key, val in iteritems(result):
             if key in valid:
                 setattr(self, key, val)
 
