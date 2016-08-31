@@ -49,7 +49,7 @@ class Pollster(object):
                     msg += " [%s]" % r_msg['errors'][0]
             except ValueError:
                 pass
-            raise PollsterException, msg
+            raise PollsterException(msg)
 
         if response.msg == 'OK':
             return json.loads(response.read())
