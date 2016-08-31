@@ -4,8 +4,9 @@ Methods for accessing the HuffPost Pollster API. Documentation for this API
 may be found at http://elections.huffingtonpost.com/pollster/api.
 """
 
-import urllib2
-from urllib import urlencode
+from future.moves.urllib.parse import urlencode
+from future.moves.urllib.request import urlopen
+from future.moves.urllib.error import HTTPError
 
 try:
     import json
@@ -37,9 +38,9 @@ class Pollster(object):
             params = {}
         url = self._build_request_url(path, params)
         try:
-            response = urllib2.urlopen(url)
-        except urllib2.HTTPError as url_exc:
-            res = url_exc.read()
+            response = urlopen(url)
+        except HTTPError as url_exc:
+            res = url_exc.read().decode('utf-8')
             msg = "An error occurred. URL: %s Reason: %s %s" % (url,
                                                                 url_exc.code,
                                                                 url_exc.reason)
@@ -52,7 +53,7 @@ class Pollster(object):
             raise PollsterException(msg)
 
         if response.msg == 'OK':
-            return json.loads(response.read())
+            return json.loads(response.read().decode('utf-8'))
 
         raise PollsterException('Invalid response returned: %s', response.msg)
 
