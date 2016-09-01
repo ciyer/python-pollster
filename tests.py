@@ -1,5 +1,4 @@
 import unittest
-import urllib2
 from pollster.pollster import Pollster, Chart, PollsterException
 
 class TestBasic(unittest.TestCase):

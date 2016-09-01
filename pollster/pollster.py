@@ -4,8 +4,10 @@ Methods for accessing the HuffPost Pollster API. Documentation for this API
 may be found at http://elections.huffingtonpost.com/pollster/api.
 """
 
-import urllib2
-from urllib import urlencode
+from future.moves.urllib.parse import urlencode
+from future.moves.urllib.request import urlopen
+from future.moves.urllib.error import HTTPError
+from future.utils import iteritems
 
 try:
     import json
@@ -37,22 +39,22 @@ class Pollster(object):
             params = {}
         url = self._build_request_url(path, params)
         try:
-            response = urllib2.urlopen(url)
-        except urllib2.HTTPError as url_exc:
-            res = url_exc.read()
+            response = urlopen(url)
+        except HTTPError as url_exc:
+            res = url_exc.read().decode('utf-8')
             msg = "An error occurred. URL: %s Reason: %s %s" % (url,
                                                                 url_exc.code,
                                                                 url_exc.reason)
             try:
                 r_msg = dict(json.loads(res))
-                if r_msg.has_key('errors'):
+                if 'errors' in r_msg:
                     msg += " [%s]" % r_msg['errors'][0]
             except ValueError:
                 pass
-            raise PollsterException, msg
+            raise PollsterException(msg)
 
         if response.msg == 'OK':
-            return json.loads(response.read())
+            return json.loads(response.read().decode('utf-8'))
 
         raise PollsterException('Invalid response returned: %s', response.msg)
 
@@ -85,11 +87,11 @@ class Chart(object):
                  'topic',
                  'state',
                  'slug', ]
-        for key, val in result.iteritems():
+        for key, val in iteritems(result):
             if key in valid:
                 setattr(self, key, val)
 
-        if result.has_key('estimates_by_date'):
+        if 'estimates_by_date' in result:
             self._estimates_by_date = result['estimates_by_date']
 
     def polls(self, **kwargs):
@@ -131,7 +133,7 @@ class Poll(object):
                  'sponsors',
                  'partisan',
                  'affiliation']
-        for key, val in result.iteritems():
+        for key, val in iteritems(result):
             if key in valid:
                 setattr(self, key, val)
 
